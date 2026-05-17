@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Note Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fdf6e8;
+    --ink: #1a1a2e;
+    --staff: #2a2a3e;
+    --coral: #ff6b6b;
+    --mint: #6dd5b0;
+    --gold: #ffc857;
+    --plum: #7b2cbf;
+    --sky: #4ea8de;
+    --paper: #fffaf0;
+    --shadow: rgba(26, 26, 46, 0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--cream);
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(255, 200, 87, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(109, 213, 176, 0.12) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(255, 107, 107, 0.06) 0%, transparent 50%);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 0 4px;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    background: var(--ink);
+    color: var(--gold);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    transform: rotate(-8deg);
+  }
+
+  .stats {
+    display: flex;
+    gap: 8px;
+  }
+
+  .stat {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    padding: 4px 10px;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .stat-icon { font-size: 14px; }
+  .stat-value { font-variant-numeric: tabular-nums; }
+
+  /* MODE SELECTOR */
+  .modes {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    background: var(--paper);
+    padding: 4px;
+    border-radius: 16px;
+    border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .mode-btn {
+    flex: 1;
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--ink);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .mode-btn.active {
+    background: var(--ink);
+    color: var(--gold);
+  }
+
+  /* STAFF CARD */
+  .card {
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 24px;
+    padding: 20px 16px;
+    box-shadow: 5px 5px 0 var(--ink);
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--coral) 0%, var(--coral) 25%, var(--gold) 25%, var(--gold) 50%, var(--mint) 50%, var(--mint) 75%, var(--sky) 75%);
+  }
+
+  .prompt {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--plum);
+    margin-bottom: 8px;
+    margin-top: 4px;
+  }
+
+  .staff-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 180px;
+  }
+
+  svg.staff {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+  }
+
+  /* FEEDBACK */
+  .feedback {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 24px;
+    height: 32px;
+    margin-top: 8px;
+    transition: all 0.3s;
+    letter-spacing: -0.02em;
+  }
+
+  .feedback.correct { color: var(--mint); transform: scale(1.1); }
+  .feedback.wrong { color: var(--coral); }
+
+  /* ANSWER BUTTONS */
+  .answers {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .note-btn {
+    aspect-ratio: 1.1;
+    border: 3px solid var(--ink);
+    background: var(--paper);
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 26px;
+    border-radius: 18px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: transform 0.1s, box-shadow 0.1s, background 0.2s;
+    color: var(--ink);
+    position: relative;
+  }
+
+  .note-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  .note-btn.correct {
+    background: var(--mint);
+    animation: pulse 0.4s;
+  }
+
+  .note-btn.wrong {
+    background: var(--coral);
+    color: white;
+    animation: shake 0.3s;
+  }
+
+  .note-btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .control-btn {
+    flex: 1;
+    padding: 12px;
+    border: 3px solid var(--ink);
+    background: var(--gold);
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--ink);
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .control-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  .control-btn.secondary {
+    background: var(--paper);
+  }
+
+  /* STREAK BURST */
+  .streak-burst {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 64px;
+    color: var(--gold);
+    text-shadow: 4px 4px 0 var(--ink);
+    pointer-events: none;
+    z-index: 100;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s;
+    opacity: 0;
+  }
+
+  .streak-burst.show {
+    transform: translate(-50%, -50%) scale(1) rotate(-8deg);
+    opacity: 1;
+  }
+
+  /* LEARN MODE */
+  .learn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .learn-card {
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 3px 3px 0 var(--ink);
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+
+  .learn-card:active { transform: scale(0.96); }
+
+  .learn-card svg { width: 100%; height: 60px; }
+
+  .learn-card .label {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 20px;
+    margin-top: 4px;
+  }
+
+  .learn-card .hint {
+    font-size: 10px;
+    color: var(--plum);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .learn-header {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .learn-header h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+
+  .learn-header p {
+    font-size: 12px;
+    color: var(--plum);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .clef-toggle {
+    display: flex;
+    gap: 6px;
+    background: var(--paper);
+    padding: 4px;
+    border-radius: 12px;
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    margin-bottom: 12px;
+  }
+
+  .clef-btn {
+    flex: 1;
+    padding: 6px;
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 12px;
+    color: var(--ink);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .clef-btn.active {
+    background: var(--plum);
+    color: var(--paper);
+  }
+
+  /* SCROLLABLE CONTENT */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo">
+      <span class="logo-mark">♪</span>
+      <span>Note Quest</span>
+    </div>
+    <div class="stats">
+      <div class="stat" id="scoreStat">
+        <span class="stat-icon">⭐</span>
+        <span class="stat-value" id="score">0</span>
+      </div>
+      <div class="stat" id="streakStat">
+        <span class="stat-icon">🔥</span>
+        <span class="stat-value" id="streak">0</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="modes">
+    <button class="mode-btn active" data-mode="quiz">Quiz</button>
+    <button class="mode-btn" data-mode="learn">Learn</button>
+  </div>
+
+  <div class="content">
+
+    <!-- QUIZ VIEW -->
+    <div id="quizView">
+      <div class="clef-toggle">
+        <button class="clef-btn active" data-clef="treble">𝄞 Treble</button>
+        <button class="clef-btn" data-clef="bass">𝄢 Bass</button>
+        <button class="clef-btn" data-clef="both">Both</button>
+      </div>
+
+      <div class="card">
+        <div class="prompt">What note is this?</div>
+        <div class="staff-container">
+          <svg class="staff" id="staffSvg" viewBox="0 0 320 180" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div class="feedback" id="feedback">&nbsp;</div>
+      </div>
+
+      <div class="answers" id="answers"></div>
+
+      <div class="controls">
+        <button class="control-btn secondary" id="skipBtn">Skip</button>
+        <button class="control-btn" id="nextBtn">Next ›</button>
+      </div>
+    </div>
+
+    <!-- LEARN VIEW -->
+    <div id="learnView" style="display:none;">
+      <div class="learn-header">
+        <h2>Learn the Notes</h2>
+        <p>Tap a card to hear the trick</p>
+      </div>
+
+      <div class="clef-toggle">
+        <button class="clef-btn active" data-learn-clef="treble">𝄞 Treble Clef</button>
+        <button class="clef-btn" data-learn-clef="bass">𝄢 Bass Clef</button>
+      </div>
+
+      <div id="learnContent"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="streak-burst" id="streakBurst"></div>
+
+<script>
+// ============== NOTE DATA ==============
+// Position is measured in half-steps from the bottom line of the staff (0 = bottom line).
+// Treble clef bottom line = E4. Bass clef bottom line = G2.
+// Each "position" unit = one staff step (line or space).
+
+const TREBLE_NOTES = [
+  { name: 'C', pos: -2, label: 'C4 (Middle C)' },  // ledger below
+  { name: 'D', pos: -1, label: 'D4' },
+  { name: 'E', pos: 0,  label: 'E4' },
+  { name: 'F', pos: 1,  label: 'F4' },
+  { name: 'G', pos: 2,  label: 'G4' },
+  { name: 'A', pos: 3,  label: 'A4' },
+  { name: 'B', pos: 4,  label: 'B4' },
+  { name: 'C', pos: 5,  label: 'C5' },
+  { name: 'D', pos: 6,  label: 'D5' },
+  { name: 'E', pos: 7,  label: 'E5' },
+  { name: 'F', pos: 8,  label: 'F5' },
+  { name: 'G', pos: 9,  label: 'G5' },
+  { name: 'A', pos: 10, label: 'A5' },
+];
+
+const BASS_NOTES = [
+  { name: 'E', pos: -2, label: 'E2' },
+  { name: 'F', pos: -1, label: 'F2' },
+  { name: 'G', pos: 0,  label: 'G2' },
+  { name: 'A', pos: 1,  label: 'A2' },
+  { name: 'B', pos: 2,  label: 'B2' },
+  { name: 'C', pos: 3,  label: 'C3' },
+  { name: 'D', pos: 4,  label: 'D3' },
+  { name: 'E', pos: 5,  label: 'E3' },
+  { name: 'F', pos: 6,  label: 'F3' },
+  { name: 'G', pos: 7,  label: 'G3' },
+  { name: 'A', pos: 8,  label: 'A3' },
+  { name: 'B', pos: 9,  label: 'B3' },
+  { name: 'C', pos: 10, label: 'C4 (Middle C)' },
+];
+
+const ALL_NOTES = ['A','B','C','D','E','F','G'];
+
+// ============== STATE ==============
+let state = {
+  mode: 'quiz',
+  clefFilter: 'treble',
+  learnClef: 'treble',
+  currentClef: 'treble',
+  currentNote: null,
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  answered: false,
+};
+
+// ============== AUDIO ==============
+const NOTE_FREQ = {
+  // Bass and treble
+  'E2': 82.41, 'F2': 87.31, 'G2': 98.00, 'A2': 110.00, 'B2': 123.47,
+  'C3': 130.81, 'D3': 146.83, 'E3': 164.81, 'F3': 174.61, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
+  'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
+  'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00,
+};
+
+let audioCtx = null;
+function playNote(noteLabel) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const key = noteLabel.split(' ')[0]; // strip "(Middle C)"
+    const freq = NOTE_FREQ[key];
+    if (!freq) return;
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.25, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.95);
+  } catch(e) {}
+}
+
+function playSuccess() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    [523.25, 659.25, 783.99].forEach((f, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      gain.gain.setValueAtTime(0, now + i*0.08);
+      gain.gain.linearRampToValueAtTime(0.2, now + i*0.08 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i*0.08 + 0.3);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now + i*0.08);
+      osc.stop(now + i*0.08 + 0.35);
+    });
+  } catch(e) {}
+}
+
+function playWrong() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(180, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.25);
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.3);
+  } catch(e) {}
+}
+
+// ============== SVG RENDERING ==============
+// Staff geometry
+const STAFF_TOP = 60;       // y of top line (line 5)
+const LINE_GAP = 12;        // gap between staff lines
+const STAFF_LEFT = 80;
+const STAFF_RIGHT = 300;
+const NOTE_X = 200;
+
+// Convert position (0 = bottom line) to y coordinate
+function posToY(pos) {
+  // bottom line (pos 0) is at STAFF_TOP + 4*LINE_GAP
+  // each pos step = LINE_GAP/2 (half a line spacing)
+  return STAFF_TOP + 4 * LINE_GAP - (pos * LINE_GAP / 2);
+}
+
+function buildStaffSVG(clef, note) {
+  let svg = '';
+
+  // Staff lines (5 lines)
+  for (let i = 0; i < 5; i++) {
+    const y = STAFF_TOP + i * LINE_GAP;
+    svg += `<line x1="${STAFF_LEFT}" y1="${y}" x2="${STAFF_RIGHT}" y2="${y}" stroke="#2a2a3e" stroke-width="1.5" />`;
+  }
+
+  // Clef
+  if (clef === 'treble') {
+    svg += `<text x="${STAFF_LEFT + 6}" y="${STAFF_TOP + 4*LINE_GAP + 8}" font-size="64" fill="#2a2a3e" font-family="serif">𝄞</text>`;
+  } else {
+    svg += `<text x="${STAFF_LEFT + 6}" y="${STAFF_TOP + 2*LINE_GAP + 6}" font-size="48" fill="#2a2a3e" font-family="serif">𝄢</text>`;
+  }
+
+  // Note + ledger lines
+  if (note) {
+    const y = posToY(note.pos);
+
+    // Ledger lines for notes outside staff
+    // Below staff (pos < 0, every even step is a line)
+    if (note.pos < 0) {
+      for (let p = -2; p >= note.pos; p -= 2) {
+        const ly = posToY(p);
+        svg += `<line x1="${NOTE_X - 12}" y1="${ly}" x2="${NOTE_X + 12}" y2="${ly}" stroke="#2a2a3e" stroke-width="1.5" />`;
+      }
+    }
+    // Above staff (pos > 8)
+    if (note.pos > 8) {
+      for (let p = 10; p <= note.pos; p += 2) {
+        const ly = posToY(p);
+        svg += `<line x1="${NOTE_X - 12}" y1="${ly}" x2="${NOTE_X + 12}" y2="${ly}" stroke="#2a2a3e" stroke-width="1.5" />`;
+      }
+    }
+
+    // Note head (whole note - oval)
+    svg += `<ellipse cx="${NOTE_X}" cy="${y}" rx="9" ry="7" fill="#1a1a2e" transform="rotate(-18 ${NOTE_X} ${y})" />`;
+  }
+
+  return svg;
+}
+
+function buildSmallStaffSVG(clef, note) {
+  // Small version for learn cards
+  const top = 16;
+  const gap = 8;
+  const left = 28;
+  const right = 110;
+  const nx = 80;
+  let svg = '';
+
+  for (let i = 0; i < 5; i++) {
+    const y = top + i * gap;
+    svg += `<line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="#2a2a3e" stroke-width="1" />`;
+  }
+
+  if (clef === 'treble') {
+    svg += `<text x="${left - 4}" y="${top + 4*gap + 6}" font-size="42" fill="#2a2a3e" font-family="serif">𝄞</text>`;
+  } else {
+    svg += `<text x="${left - 4}" y="${top + 2*gap + 4}" font-size="32" fill="#2a2a3e" font-family="serif">𝄢</text>`;
+  }
+
+  if (note) {
+    const y = top + 4*gap - (note.pos * gap / 2);
+    if (note.pos < 0) {
+      for (let p = -2; p >= note.pos; p -= 2) {
+        const ly = top + 4*gap - (p * gap / 2);
+        svg += `<line x1="${nx - 8}" y1="${ly}" x2="${nx + 8}" y2="${ly}" stroke="#2a2a3e" stroke-width="1" />`;
+      }
+    }
+    if (note.pos > 8) {
+      for (let p = 10; p <= note.pos; p += 2) {
+        const ly = top + 4*gap - (p * gap / 2);
+        svg += `<line x1="${nx - 8}" y1="${ly}" x2="${nx + 8}" y2="${ly}" stroke="#2a2a3e" stroke-width="1" />`;
+      }
+    }
+    svg += `<ellipse cx="${nx}" cy="${y}" rx="6" ry="4.5" fill="#1a1a2e" transform="rotate(-18 ${nx} ${y})" />`;
+  }
+
+  return svg;
+}
+
+// ============== QUIZ LOGIC ==============
+function pickNote() {
+  let clef;
+  if (state.clefFilter === 'both') {
+    clef = Math.random() < 0.5 ? 'treble' : 'bass';
+  } else {
+    clef = state.clefFilter;
+  }
+  state.currentClef = clef;
+  const pool = clef === 'treble' ? TREBLE_NOTES : BASS_NOTES;
+  state.currentNote = pool[Math.floor(Math.random() * pool.length)];
+  state.answered = false;
+}
+
+function renderStaff() {
+  document.getElementById('staffSvg').innerHTML =
+    buildStaffSVG(state.currentClef, state.currentNote);
+}
+
+function renderAnswers() {
+  const correct = state.currentNote.name;
+  const others = ALL_NOTES.filter(n => n !== correct);
+  // shuffle others
+  for (let i = others.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [others[i], others[j]] = [others[j], others[i]];
+  }
+  const choices = [correct, ...others.slice(0, 3)];
+  // shuffle choices
+  for (let i = choices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [choices[i], choices[j]] = [choices[j], choices[i]];
+  }
+
+  const container = document.getElementById('answers');
+  container.innerHTML = '';
+  choices.forEach(letter => {
+    const btn = document.createElement('button');
+    btn.className = 'note-btn';
+    btn.textContent = letter;
+    btn.onclick = () => handleAnswer(letter, btn);
+    container.appendChild(btn);
+  });
+}
+
+function handleAnswer(letter, btn) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const correct = state.currentNote.name;
+  const feedback = document.getElementById('feedback');
+  const allBtns = document.querySelectorAll('.note-btn');
+
+  if (letter === correct) {
+    btn.classList.add('correct');
+    feedback.textContent = '✓ ' + state.currentNote.label;
+    feedback.className = 'feedback correct';
+    state.score++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    playSuccess();
+    playNote(state.currentNote.label);
+
+    // Celebrate streak milestones
+    if (state.streak > 0 && state.streak % 5 === 0) {
+      showStreakBurst(state.streak);
+    }
+  } else {
+    btn.classList.add('wrong');
+    feedback.textContent = '✗ It was ' + correct;
+    feedback.className = 'feedback wrong';
+    state.streak = 0;
+    playWrong();
+    // highlight correct one
+    allBtns.forEach(b => {
+      if (b.textContent === correct) b.classList.add('correct');
+    });
+  }
+
+  // disable all
+  allBtns.forEach(b => b.classList.add('disabled'));
+
+  updateStats();
+}
+
+function showStreakBurst(n) {
+  const el = document.getElementById('streakBurst');
+  el.textContent = n + ' 🔥';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 900);
+}
+
+function nextQuestion() {
+  pickNote();
+  renderStaff();
+  renderAnswers();
+  document.getElementById('feedback').textContent = '\u00A0';
+  document.getElementById('feedback').className = 'feedback';
+}
+
+function updateStats() {
+  document.getElementById('score').textContent = state.score;
+  document.getElementById('streak').textContent = state.streak;
+}
+
+// ============== LEARN MODE ==============
+function renderLearn() {
+  const clef = state.learnClef;
+  const notes = clef === 'treble' ? TREBLE_NOTES : BASS_NOTES;
+
+  // Filter to staff-range only (in-staff notes are most useful for learning lines/spaces)
+  // Treble lines: E G B D F (pos 0,2,4,6,8) — "Every Good Boy Does Fine"
+  // Treble spaces: F A C E (pos 1,3,5,7) — "FACE"
+  // Bass lines: G B D F A (pos 0,2,4,6,8) — "Good Boys Do Fine Always"
+  // Bass spaces: A C E G (pos 1,3,5,7) — "All Cows Eat Grass"
+
+  const linesPositions = [0,2,4,6,8];
+  const spacesPositions = [1,3,5,7];
+
+  const lineNotes = notes.filter(n => linesPositions.includes(n.pos));
+  const spaceNotes = notes.filter(n => spacesPositions.includes(n.pos));
+
+  const mnemonic = clef === 'treble'
+    ? { lines: 'Every Good Boy Does Fine', spaces: 'F-A-C-E (spells FACE!)' }
+    : { lines: 'Good Boys Do Fine Always', spaces: 'All Cows Eat Grass' };
+
+  let html = '';
+  html += `<div style="background:var(--paper);border:3px solid var(--ink);border-radius:18px;padding:14px;box-shadow:3px 3px 0 var(--ink);margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--plum);margin-bottom:4px;">Lines (bottom to top)</div>
+    <div style="font-family:'Fraunces',serif;font-weight:900;font-size:18px;line-height:1.2;">${mnemonic.lines}</div>
+  </div>`;
+
+  html += `<div class="learn-grid">`;
+  lineNotes.forEach(n => {
+    html += `<div class="learn-card" data-note="${n.label}">
+      <svg viewBox="0 0 130 60">${buildSmallStaffSVG(clef, n)}</svg>
+      <div class="label">${n.name}</div>
+      <div class="hint">${n.label}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<div style="background:var(--paper);border:3px solid var(--ink);border-radius:18px;padding:14px;box-shadow:3px 3px 0 var(--ink);margin-bottom:12px;margin-top:18px;">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--plum);margin-bottom:4px;">Spaces (bottom to top)</div>
+    <div style="font-family:'Fraunces',serif;font-weight:900;font-size:18px;line-height:1.2;">${mnemonic.spaces}</div>
+  </div>`;
+
+  html += `<div class="learn-grid">`;
+  spaceNotes.forEach(n => {
+    html += `<div class="learn-card" data-note="${n.label}">
+      <svg viewBox="0 0 130 60">${buildSmallStaffSVG(clef, n)}</svg>
+      <div class="label">${n.name}</div>
+      <div class="hint">${n.label}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  document.getElementById('learnContent').innerHTML = html;
+
+  document.querySelectorAll('.learn-card').forEach(card => {
+    card.onclick = () => playNote(card.dataset.note);
+  });
+}
+
+// ============== EVENT WIRING ==============
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode = btn.dataset.mode;
+    if (state.mode === 'quiz') {
+      document.getElementById('quizView').style.display = '';
+      document.getElementById('learnView').style.display = 'none';
+    } else {
+      document.getElementById('quizView').style.display = 'none';
+      document.getElementById('learnView').style.display = '';
+      renderLearn();
+    }
+  };
+});
+
+document.querySelectorAll('[data-clef]').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('[data-clef]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.clefFilter = btn.dataset.clef;
+    nextQuestion();
+  };
+});
+
+document.querySelectorAll('[data-learn-clef]').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('[data-learn-clef]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.learnClef = btn.dataset.learnClef;
+    renderLearn();
+  };
+});
+
+document.getElementById('nextBtn').onclick = nextQuestion;
+document.getElementById('skipBtn').onclick = () => {
+  state.streak = 0;
+  updateStats();
+  nextQuestion();
+};
+
+// ============== INIT ==============
+nextQuestion();
+updateStats();
+</script>
+</body>
+</html>
